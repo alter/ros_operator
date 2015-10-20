@@ -11,7 +11,7 @@ def write_csv_header(file):
   f = open(file,'w')
   try:
     writer = csv.writer(f)
-    writer.writerow( ('Реестровый номер',  'Полное наименование', 'Сокращенное наименование', 'Адрес (место нахождения)', 'Почтовый адрес', 'Адрес официального сайта в сети "Интернет"', 'ИНН', 'ОГРН', 'Членство туроператора, осуществления деятельности в области выездного туризма, в объединении туроператоров в сфере выездного туризма', 'Адреса структурных подразделений', 'Общий размер финансового обеспечения') )
+    writer.writerow( ('Реестровый номер',  'Полное наименование', 'Сокращенное наименование', 'Адрес (место нахождения)', 'Почтовый адрес', 'Адрес официального сайта в сети "Интернет"', 'ИНН', 'ОГРН', 'Членство туроператора, осуществления деятельности в области выездного туризма, в объединении туроператоров в сфере выездного туризма', 'Адреса структурных подразделений', 'Имя периода', 'Общий размер финансовой гарантии') )
   finally:
     f.close()
 
@@ -83,9 +83,9 @@ def parse_json(jsoncontent, file):
       forms_of_tourism_activities = item.get('E13')
       order_in_SFR = item.get('E14')
       for key in info_about_financial_guarantee[0]:
-        print info_about_financial_guarantee[0][key]
-      tupl = (reg_number.encode('utf-8').strip(),full_name.encode('utf-8').strip(),abbreviated_name.encode('utf-8').strip(),address_location.encode('utf-8').strip(),postal_address.encode('utf-8').strip(),website.encode('utf-8').strip(),inn.encode('utf-8').strip(),ogrn.encode('utf-8').strip(),membership.encode('utf-8').strip(), structural_units_addresses.encode('utf-8').strip(),total_amount_of_funds.encode('utf-8').strip())
-#      csv = u''.join(string).encode('utf-8').strip()
+        tupl = (reg_number,full_name,abbreviated_name,address_location,postal_address,website,inn,ogrn,membership, structural_units_addresses,name_of_period,amount_of_financial_guarantee)
+      tupl = [x.encode('utf-8').strip() for x in tupl]
+#      csv = u''.join(string).exncode('utf-8').strip()
       write_csv_body(file, tupl)
     exit(1)
 
