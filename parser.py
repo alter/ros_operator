@@ -11,7 +11,7 @@ def write_csv_header(file):
   f = open(file,'w')
   try:
     writer = csv.writer(f)
-    writer.writerow( ('Реестровый номер',  'Полное наименование', 'Сокращенное наименование', 'Адрес (место нахождения)', 'Почтовый адрес', 'Адрес официального сайта в сети "Интернет"', 'ИНН', 'ОГРН', 'Членство туроператора, осуществления деятельности в области выездного туризма, в объединении туроператоров в сфере выездного туризма', 'Адреса структурных подразделений', 'Имя периода', 'Общий размер финансовой гарантии') )
+    writer.writerow( ('Реестровый номер',  'Полное наименование', 'Сокращенное наименование', 'Адрес (место нахождения)', 'Почтовый адрес', 'Адрес официального сайта в сети "Интернет"', 'ИНН', 'ОГРН', 'Членство туроператора, осуществления деятельности в области выездного туризма, в объединении туроператоров в сфере выездного туризма', 'Адреса структурных подразделений', 'Имя периода', 'Общий размер финансовой гарантии', 'Размер финансового обеспечения', 'Способ финансового обеспечения', 'Срок действия финансового обеспечения c', 'Срок действия финансового обеспечения по', 'Наименование организации, предоставившей финансовое обеспечение', 'Адрес (место нахождения) организации, предоставившей финансовое обеспечение', 'Почтовый адрес организации, предоставившей финансовое обеспечение', 'Номер приказа', 'Дата приказа', 'Номер выданного свидетельства') )
   finally:
     f.close()
 
@@ -64,30 +64,49 @@ def parse_json(jsoncontent, file):
       structural_units_addresses = item.get('E10').replace('\r\n','|').replace('\n', '|')
       total_amount_of_funds = item.get('E11').replace('\n','|')
       info_about_financial_guarantee = item.get('E12')
-      name_of_period = info_about_financial_guarantee[0].get('E12A').replace('\n','|')
-      amount_of_financial_guarantee = info_about_financial_guarantee[0].get('E12B').replace('\n','|')
-      list_of_documents = info_about_financial_guarantee[0].get('E12C')
-      documents = {}
-      for idx, item in enumerate(list_of_documents):
-        documents['doc'+str(idx)] = {
-          'financial_guarantee': item.get('E12C1').replace('\n','|'),
-          'way_of_financial_guarantee': item.get('E12C2').replace('\n','|'),
-          'number_of_doc': item.get('E12C3').replace('\n','|'),
-          'date_of_doc': item.get('E12C4').replace('\n','|'),
-          'start_date_of_financial_guarantee': item.get('E12C5').replace('\n','|'),
-          'end_date_of_financial_guarantee': item.get('E12C6').replace('\n','|'),
-          'entity_name': item.get('E12C7').replace('\n','|'),
-          'entity_location_address': item.get('E12C8').replace('\n','|'),
-          'entity_postal_address': item.get('E12C9').replace('\n','|')
-        }
+      if info_about_financial_guarantee:
+        name_of_period = info_about_financial_guarantee[0].get('E12A').replace('\n','|')
+        amount_of_financial_guarantee = info_about_financial_guarantee[0].get('E12B').replace('\n','|')
+        list_of_documents = info_about_financial_guarantee[0].get('E12C')
+        documents = {}
+        for idx, item in enumerate(list_of_documents):
+          documents['doc'+str(idx)] = {
+            'financial_guarantee': item.get('E12C1').replace('\n','|'),
+            'way_of_financial_guarantee': item.get('E12C2').replace('\n','|'),
+            'number_of_doc': item.get('E12C3').replace('\n','|'),
+            'date_of_doc': item.get('E12C4').replace('\n','|'),
+            'start_date_of_financial_guarantee': item.get('E12C5').replace('\n','|'),
+            'end_date_of_financial_guarantee': item.get('E12C6').replace('\n','|'),
+            'entity_name': item.get('E12C7').replace('\n','|'),
+            'entity_location_address': item.get('E12C8').replace('\n','|'),
+            'entity_postal_address': item.get('E12C9').replace('\n','|')
+          }
+        if 'doc0' in documents:
+          latest_document = documents['doc0']
+          doc_financial_guarantee = latest_document['financial_guarantee']
+          doc_way_of_financial_guarantee = latest_document['way_of_financial_guarantee']
+          doc_start_date_of_financial_guarantee = latest_document['start_date_of_financial_guarantee']
+          doc_end_date_of_financial_guarantee = latest_document['end_date_of_financial_guarantee']
+          doc_entity_name = latest_document['entity_name']
+          doc_entity_location_address = latest_document['entity_location_address']
+          doc_entity_postal_address = latest_document['entity_postal_address']
+        else:
+          doc_financial_guarantee = doc_way_of_financial_guarantee = doc_start_date_of_financial_guarantee = doc_end_date_of_financial_guarantee = doc_entity_name = doc_entity_location_address = doc_entity_postal_address = 'None'
+
       forms_of_tourism_activities = item.get('E13')
       order_in_SFR = item.get('E14')
+      if order_in_SFR:
+        for key in order_in_SFR:
+          number_of_order = order_in_SFR[key]
+          date_of_order = order_in_SFR[key]
+          issue_certificate_number = order_in_SFR[key]
+      else:
+          number_of_order = date_of_order = issue_certificate_number = 'None'
       for key in info_about_financial_guarantee[0]:
-        tupl = (reg_number,full_name,abbreviated_name,address_location,postal_address,website,inn,ogrn,membership, structural_units_addresses,name_of_period,amount_of_financial_guarantee)
+        tupl = (reg_number,full_name,abbreviated_name,address_location,postal_address,website,inn,ogrn,membership, structural_units_addresses,name_of_period,amount_of_financial_guarantee, doc_financial_guarantee,doc_way_of_financial_guarantee, doc_start_date_of_financial_guarantee, doc_end_date_of_financial_guarantee, doc_entity_name, doc_entity_location_address, doc_entity_postal_address, number_of_order, date_of_order, issue_certificate_number)
       tupl = [x.encode('utf-8').strip() for x in tupl]
-#      csv = u''.join(string).exncode('utf-8').strip()
       write_csv_body(file, tupl)
-    exit(1)
+#    exit(1)
 
 if __name__ == "__main__":
   list_url = 'http://opendata.russiatourism.ru/list.csv'
