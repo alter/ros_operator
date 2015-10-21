@@ -6,6 +6,9 @@ import csv
 import re
 import json
 import datetime
+from pyexcel.cookbook import merge_all_to_a_book
+import pyexcel.ext.xlsx # needed to support xlsx format, pip install pyexcel-xlsx
+import glob
 
 def write_csv_header(file):
   f = open(file,'w')
@@ -47,6 +50,9 @@ def get_json(fname):
   url = "http://opendata.russiatourism.ru/%s/data-%s-structure-20140904.json" % (fname, date)
   response = get_content(url).read()
   return response
+
+def csv_to_xls(cf,nf):
+  merge_all_to_a_book(glob.glob(cf), nf)
 
 def parse_json(jsoncontent, file):
   jlist = json.loads(jsoncontent)
@@ -111,13 +117,15 @@ def parse_json(jsoncontent, file):
 if __name__ == "__main__":
   list_url = 'http://opendata.russiatourism.ru/list.csv'
   structure_url = 'http://opendata.russiatourism.ru/7708550300-ReestrRosturizm1B/structure-20140904.json'
-  out_file = './generated.csv'
+  out_file_csv = './generated.csv'
+  out_file_xlsx = './generated.xlsx'
 
   st = get_content(structure_url).read()
   csvcontent = get_content(list_url)
   filenames = get_filenames(csvcontent)
-  write_csv_header(out_file)
+  write_csv_header(out_file_csv)
   for fname in filenames:
     jsoncontent = get_json(fname)
-    parse_json(jsoncontent, out_file)
+    parse_json(jsoncontent, out_file_csv)
 
+  csv_to_xls(out_file_csv,out_file_xlsx)
